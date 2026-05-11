@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The £500 Fix — MV Level 2</title>
+<style>
+  :root {
+    --dark: #1a1a2e;
+    --darker: #0f0f1a;
+    --card: #16213e;
+    --border: rgba(255,255,255,0.1);
+    --text: #e8e8e8;
+    --muted: #9a9ab0;
+    --accent: #e74c3c;
+    --red: #ef5350;
+    --amber: #ffa726;
+    --green: #4caf50;
+    --blue: #42a5f5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--darker); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--dark);
+    border-bottom: 2px solid var(--accent);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .back-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+  .back-btn:hover { background: var(--card); color: var(--text); }
+  .header-icon { font-size: 24px; flex-shrink: 0; }
+  header h1 { font-size: 17px; font-weight: 600; color: #fff; }
+  header p { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .main { padding: 1.5rem; max-width: 900px; margin: 0 auto; }
+
+  .nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+  .nav-btn { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 18px; font-size: 13px; color: var(--text); cursor: pointer; transition: background 0.15s; }
+  .nav-btn:hover:not(:disabled) { background: #1e2d50; }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .nav-counter { font-size: 14px; color: var(--muted); }
+
+  .brief-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.25rem; }
+  .brief-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .brief-title { font-size: 17px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .brief-sub { font-size: 12px; color: var(--muted); }
+  .budget-pill { background: #0d2a1a; color: var(--green); border: 1px solid #1a5a2a; border-radius: 20px; padding: 5px 16px; font-size: 14px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+  .brief-context { background: #0e1525; border-left: 3px solid #9b59b6; border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 14px; color: #c8b0e0; font-style: italic; line-height: 1.6; margin-bottom: 1rem; }
+
+  .instructions { background: #0d2a1a; border: 1px solid #1a5a2a; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #90d090; line-height: 1.7; }
+  .instructions strong { color: var(--green); }
+  .step { display: flex; gap: 10px; margin-top: 8px; }
+  .step-num { background: #1a5a2a; color: var(--green); width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+  .tracker { background: var(--dark); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; position: sticky; top: 72px; z-index: 50; }
+  .tracker-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .tracker-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .tracker-bar-wrap { flex: 1; min-width: 120px; }
+  .tracker-bar-bg { height: 10px; background: #1a1a2e; border-radius: 5px; overflow: hidden; }
+  .tracker-bar-fill { height: 10px; border-radius: 5px; transition: width 0.3s, background 0.3s; }
+  .tracker-total { font-size: 18px; font-weight: 700; white-space: nowrap; }
+  .tracker-cats { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+  .tracker-cat { font-size: 12px; color: var(--muted); }
+  .tracker-cat span { font-weight: 600; }
+  .tracker-over { font-size: 12px; color: var(--red); font-weight: 600; margin-top: 6px; display: none; }
+
+  .faults-section { margin-bottom: 1.25rem; }
+  .section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; }
+
+  .legend { display: flex; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  .fault-row { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 12px; transition: border-color 0.2s; }
+  .fault-row.assigned-must { border-color: rgba(239,83,80,0.5); }
+  .fault-row.assigned-should { border-color: rgba(255,167,38,0.5); }
+  .fault-row.assigned-could { border-color: rgba(76,175,80,0.5); }
+  .fault-info { flex: 1; }
+  .fault-desc { font-size: 14px; color: var(--text); line-height: 1.5; margin-bottom: 4px; }
+  .fault-cost { font-size: 13px; font-weight: 700; color: var(--blue); }
+  .fault-btns { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+  .assign-btn { border: 1px solid; border-radius: 6px; padding: 6px 10px; font-size: 11px; font-weight: 700; cursor: pointer; transition: background 0.15s; white-space: nowrap; background: transparent; min-width: 95px; text-align: center; }
+  .assign-btn:active { transform: scale(0.96); }
+  .btn-must { border-color: var(--red); color: var(--red); }
+  .btn-must.active { background: rgba(239,83,80,0.2); }
+  .btn-must:hover { background: rgba(239,83,80,0.1); }
+  .btn-should { border-color: var(--amber); color: var(--amber); }
+  .btn-should.active { background: rgba(255,167,38,0.2); }
+  .btn-should:hover { background: rgba(255,167,38,0.1); }
+  .btn-could { border-color: var(--green); color: var(--green); }
+  .btn-could.active { background: rgba(76,175,80,0.2); }
+  .btn-could:hover { background: rgba(76,175,80,0.1); }
+
+  .reveal-btn { width: 100%; background: #1a2a4a; border: 1px solid var(--blue); border-radius: 8px; padding: 13px; font-size: 14px; font-weight: 600; color: #7ec8f0; cursor: pointer; transition: background 0.15s; margin-bottom: 1rem; }
+  .reveal-btn:hover:not(:disabled) { background: #1e3560; }
+  .reveal-btn:disabled { opacity: 0.4; cursor: default; }
+
+  .verdict-panel { display: none; }
+  .verdict-panel.open { display: block; }
+
+  .compare-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 1rem; overflow-x: auto; }
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+  .compare-table th { background: #0e1525; padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .compare-table td { padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.05); vertical-align: top; line-height: 1.5; }
+  .match { color: var(--green); font-weight: 700; }
+  .mismatch { color: var(--red); font-weight: 700; }
+  .not-assigned { color: var(--muted); font-style: italic; }
+
+  .pri { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .pri-must { background: #3a0f0f; color: var(--red); }
+  .pri-should { background: #3a2a00; color: var(--amber); }
+  .pri-could { background: #1a3a1a; color: var(--green); }
+
+  .score-box { background: #0e1525; border-radius: 8px; padding: 14px 18px; margin-bottom: 1rem; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .score-big { font-size: 36px; font-weight: 700; color: #fff; }
+  .score-label { font-size: 13px; color: var(--muted); }
+
+  .verdict-box { background: #0d2a1a; border: 1px solid #1a5a2a; border-radius: 8px; padding: 14px 18px; font-size: 13px; color: #90d090; line-height: 1.7; margin-bottom: 1rem; }
+  .verdict-box strong { color: var(--green); }
+
+  .teacher-note { background: #0d1f0d; border-left: 3px solid var(--green); border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 13px; color: #90c890; line-height: 1.6; margin-bottom: 1rem; }
+  .teacher-note strong { color: var(--green); }
+
+  .reset-btn { background: transparent; border: 1px solid var(--border); border-radius: 6px; padding: 8px 16px; font-size: 13px; color: var(--muted); cursor: pointer; margin-bottom: 2rem; }
+  .reset-btn:hover { background: var(--card); }
+
+  @media (max-width: 560px) {
+    .fault-row { flex-direction: column; }
+    .fault-btns { flex-direction: row; }
+    .assign-btn { min-width: 0; flex: 1; }
+  }
+
+  footer { text-align: center; padding: 2rem; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 1rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-btn" href="index.html">← All activities</a>
+  <div class="header-icon">💸</div>
+  <div>
+    <h1>The £500 Fix</h1>
+    <p>Triage the faults · Manage the budget · Justify your decisions</p>
+  </div>
+</header>
+
+<div class="main">
+  <div class="nav-row">
+    <button class="nav-btn" id="prev-btn" onclick="moveJob(-1)" disabled>← Previous job</button>
+    <span class="nav-counter" id="job-counter">Job 1 of 4</span>
+    <button class="nav-btn" id="next-btn" onclick="moveJob(1)">Next job →</button>
+  </div>
+  <div id="job-area"></div>
+</div>
+
+<footer>Motor Vehicle Level 2 &nbsp;·&nbsp; East Surrey College &nbsp;·&nbsp; Teacher resource</footer>
+
+<script>
+const JOBS = [
+  {
+    title: "Mr Thompson's runaround",
+    vehicle: "2009 Vauxhall Astra 1.6 — 112,000 miles",
+    icon: "🔧",
+    budget: 500,
+    context: "Customer needs it for work on Monday. Says: \"just do what's needed to keep it safe and legal — nothing fancy.\"",
+    faults: [
+      { desc: "Front brake pads — 1mm remaining (legal minimum 1.6mm)", cost: 85, priority: "must", reason: "Below legal limit — illegal and dangerous. Safety-critical." },
+      { desc: "Nearside front tyre — 2mm tread, cracking on sidewall", cost: 75, priority: "must", reason: "Sidewall cracking is an MOT failure regardless of tread depth. Immediate safety risk." },
+      { desc: "Engine oil service overdue (18 months)", cost: 55, priority: "should", reason: "Not a legal issue but oil degradation risks engine damage. Customer drives daily." },
+      { desc: "Rear wiper blade — smearing badly", cost: 12, priority: "could", reason: "Annoyance but not an MOT fail in isolation." },
+      { desc: "Front anti-roll bar drop links — worn, knocking on bumps", cost: 90, priority: "should", reason: "Not immediately dangerous but causes handling instability and will fail MOT." },
+      { desc: "Air conditioning regas", cost: 70, priority: "could", reason: "Not safety-related. Customer didn't mention it. Could wait." },
+      { desc: "Rear brake discs and pads — discs lipped, pads at 3mm", cost: 140, priority: "should", reason: "Not at limit yet but lipped discs reduce braking performance." }
+    ],
+    verdict: "Must-do total: £160. Recommended (must + should): £370. Over budget if all done — you must discuss the rear brakes with the customer and get authorisation before proceeding.",
+    teacherNote: "Key point: you cannot authorise extra work without customer consent — this is a legal and ethical issue. Ask: what happens if you just do it all and charge £527? Which 'should' item would you prioritise if they could only afford one more?"
+  },
+  {
+    title: "Priya's first car",
+    vehicle: "2014 Ford Fiesta 1.25 — 67,000 miles",
+    icon: "🌟",
+    budget: 500,
+    context: "19-year-old, just passed her test. Very anxious — says: \"I don't know anything about cars, please just make sure it's safe.\"",
+    faults: [
+      { desc: "Nearside rear brake light — bulb out", cost: 8, priority: "must", reason: "MOT failure, illegal to drive at night. Simple and cheap — always do this." },
+      { desc: "Cabin air filter — completely blocked", cost: 22, priority: "should", reason: "Affects air quality and HVAC. Not safety-critical but cheap and easy." },
+      { desc: "Front wiper blades — smearing", cost: 18, priority: "should", reason: "Visibility issue, especially in rain. Cheap and quick." },
+      { desc: "Coolant flush and refill (3 years old)", cost: 45, priority: "should", reason: "Degraded coolant loses freeze protection and causes corrosion. Preventative." },
+      { desc: "Timing belt — last changed unknown, manufacturer interval 5yrs/60k", cost: 320, priority: "must", reason: "If the belt snaps the engine is destroyed. Unknown history = treat as overdue. Non-negotiable." },
+      { desc: "Alloy wheel scuffs — cosmetic kerbing on two wheels", cost: 140, priority: "could", reason: "Purely cosmetic. Zero safety or mechanical relevance." }
+    ],
+    verdict: "Must-do: timing belt + brake light = £328. Well within budget. Recommend adding wipers and cabin filter for £40 more. Skip the alloys entirely — cosmetic work is not the priority.",
+    teacherNote: "Discuss: how do you explain the timing belt risk to someone who knows nothing about cars? What language do you use? Link to customer communication skills and consumer rights."
+  },
+  {
+    title: "The 'just sell it' special",
+    vehicle: "2007 BMW 3 Series 320d — 158,000 miles",
+    icon: "⚠️",
+    budget: 500,
+    context: "Customer says: \"I'm selling it next month, just make it pass the MOT — nothing more.\" He's already had one failure notice.",
+    faults: [
+      { desc: "Nearside headlamp — aim too low, bulb intermittent", cost: 35, priority: "must", reason: "MOT failure item. Mandatory to fix." },
+      { desc: "Exhaust — blowing at flexi joint", cost: 95, priority: "must", reason: "MOT failure. Noise and emissions issue." },
+      { desc: "Front tyres — 1.8mm both sides (just above legal limit)", cost: 130, priority: "should", reason: "Technically legal but borderline. MOT tester may flag as advisory. Risk to next owner." },
+      { desc: "EGR valve — fault code present, rough idle", cost: 180, priority: "should", reason: "Will likely cause an emissions MOT failure. Important." },
+      { desc: "Rear suspension spring — cracked nearside", cost: 120, priority: "must", reason: "MOT failure and safety hazard — could cause sudden collapse." },
+      { desc: "Full interior valet", cost: 80, priority: "could", reason: "Helps sale price but zero mechanical relevance." }
+    ],
+    verdict: "Must-do items alone = £250. Must + EGR = £430 — strongly advised as emissions will likely fail. Tyres borderline — advise the customer but it's their call. Skip the valet.",
+    teacherNote: "Ethical dimension: is there a duty to warn the customer about the borderline tyres even if they're technically legal? What if they refuse the cracked spring repair and want to drive away — what do you do?"
+  },
+  {
+    title: "The fleet manager's nightmare",
+    vehicle: "2019 Renault Trafic 1.6 dCi — company van, 94,000 miles",
+    icon: "🚐",
+    budget: 500,
+    context: "Fleet manager from a plumbing company. Says: \"I need it back by Thursday and I want a full written report for my records.\"",
+    faults: [
+      { desc: "DPF warning light — partially blocked, forced regen failed", cost: 180, priority: "must", reason: "Short journeys mean DPF won't self-clean. Continued use risks full DPF failure (£800+)." },
+      { desc: "Front brake discs and pads — heavy lipping, pads at 2mm", cost: 160, priority: "must", reason: "Commercial vehicle braking standards are stricter. Heavy payload makes this safety-critical." },
+      { desc: "Nearside door mirror — cracked glass", cost: 28, priority: "must", reason: "MOT failure on a commercial vehicle. Required for safe lane changes when loaded." },
+      { desc: "Rear load area — sharp metal edge from impact damage", cost: 45, priority: "should", reason: "Health and safety risk to anyone loading the van. Employer liability issue." },
+      { desc: "Air conditioning — not cooling", cost: 70, priority: "could", reason: "Driver comfort. Not safety-related but worth noting in the written report." }
+    ],
+    verdict: "Everything except air con = £413. Well within budget. Do it all — including air con — for £483 and stay under budget. Fleet manager wants a full written report: list all parts, labour, costs and future recommendations.",
+    teacherNote: "Ask: why are commercial vehicle inspection standards higher than private cars? Who is legally liable if a van driver has an accident because of a known fault? Link to employer H&S obligations and RIDDOR."
+  }
+];
+
+let jobIdx = 0;
+let assignments = [];
+
+function priClass(p) { return p === 'must' ? 'pri-must' : p === 'should' ? 'pri-should' : 'pri-could'; }
+function priLabel(p) { return p === 'must' ? 'Must fix' : p === 'should' ? 'Should fix' : 'Could wait'; }
+
+function renderJob() {
+  const j = JOBS[jobIdx];
+  assignments = j.faults.map(() => null);
+  document.getElementById('job-counter').textContent = 'Job ' + (jobIdx + 1) + ' of ' + JOBS.length;
+  document.getElementById('prev-btn').disabled = jobIdx === 0;
+  document.getElementById('next-btn').disabled = jobIdx === JOBS.length - 1;
+
+  const faultsHTML = j.faults.map((f, i) => `
+    <div class="fault-row" id="fault-row-${i}">
+      <div class="fault-info">
+        <div class="fault-desc">${f.desc}</div>
+        <div class="fault-cost">£${f.cost}</div>
+      </div>
+      <div class="fault-btns">
+        <button class="assign-btn btn-must" id="btn-must-${i}" onclick="assign(${i},'must')">🔴 Must fix</button>
+        <button class="assign-btn btn-should" id="btn-should-${i}" onclick="assign(${i},'should')">🟡 Should fix</button>
+        <button class="assign-btn btn-could" id="btn-could-${i}" onclick="assign(${i},'could')">🟢 Could wait</button>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('job-area').innerHTML = `
+    <div class="brief-card">
+      <div class="brief-top">
+        <div>
+          <div class="brief-title">${j.icon} ${j.title}</div>
+          <div class="brief-sub">${j.vehicle}</div>
+        </div>
+        <div class="budget-pill">Budget: £${j.budget}</div>
+      </div>
+      <div class="brief-context">"${j.context}"</div>
+      <div class="instructions">
+        <strong>Your task — work through this as a group:</strong>
+        <div class="step"><div class="step-num">1</div><div>Read each fault and its cost.</div></div>
+        <div class="step"><div class="step-num">2</div><div>Click <strong style="color:var(--red)">Must fix</strong> (safety or legal — has to be done), <strong style="color:var(--amber)">Should fix</strong> (important but not critical right now), or <strong style="color:var(--green)">Could wait</strong> (low priority or cosmetic) for each fault.</div></div>
+        <div class="step"><div class="step-num">3</div><div>Watch your budget tracker — must fix + should fix costs count against your £${j.budget} limit.</div></div>
+        <div class="step"><div class="step-num">4</div><div>Assign every fault, then reveal the verdict and see how your choices compare.</div></div>
+      </div>
+    </div>
+
+    <div class="tracker" id="tracker">
+      <div class="tracker-row">
+        <div class="tracker-label">Budget used:</div>
+        <div class="tracker-bar-wrap">
+          <div class="tracker-bar-bg"><div class="tracker-bar-fill" id="bar-fill" style="width:0%;background:var(--green);"></div></div>
+        </div>
+        <div class="tracker-total" id="tracker-total">£0 <span style="font-size:13px;color:var(--muted);font-weight:400;">/ £${j.budget}</span></div>
+      </div>
+      <div class="tracker-cats">
+        <div class="tracker-cat">🔴 Must fix: <span id="cat-must">£0</span></div>
+        <div class="tracker-cat">🟡 Should fix: <span id="cat-should">£0</span></div>
+        <div class="tracker-cat">🟢 Could wait: <span id="cat-could">£0</span></div>
+        <div class="tracker-cat" style="margin-left:auto;"><span id="assign-count" style="color:var(--amber);">0 / ${j.faults.length} assigned</span></div>
+      </div>
+      <div class="tracker-over" id="tracker-over">⚠️ Over budget! Review your 'should fix' choices.</div>
+    </div>
+
+    <div class="faults-section">
+      <div class="section-label">Faults found on this vehicle</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red);"></div>Must fix — safety or legal issue</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber);"></div>Should fix — important, not critical</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div>Could wait — low priority or cosmetic</div>
+      </div>
+      ${faultsHTML}
+    </div>
+
+    <div>
+      <button class="reveal-btn" id="reveal-btn" onclick="revealVerdict()" disabled>
+        👁 Reveal recommended verdict — assign all faults first
+      </button>
+      <div class="verdict-panel" id="verdict-panel">
+        <div class="compare-card">
+          <table class="compare-table">
+            <thead><tr><th>Fault</th><th>Cost</th><th>Your call</th><th>Recommended</th><th>Result</th></tr></thead>
+            <tbody id="compare-tbody"></tbody>
+          </table>
+        </div>
+        <div class="score-box">
+          <div>
+            <div class="score-big" id="score-display">—</div>
+            <div class="score-label">faults matched the recommended verdict</div>
+          </div>
+        </div>
+        <div class="verdict-box"><strong>Recommended verdict:</strong> ${j.verdict}</div>
+        <div class="teacher-note"><strong>Teacher note:</strong> ${j.teacherNote}</div>
+        <button class="reset-btn" onclick="renderJob()">↺ Reset and try again</button>
+      </div>
+    </div>`;
+}
+
+function assign(i, priority) {
+  assignments[i] = priority;
+  const j = JOBS[jobIdx];
+  ['must','should','could'].forEach(p => {
+    document.getElementById('btn-' + p + '-' + i).classList.toggle('active', p === priority);
+  });
+  document.getElementById('fault-row-' + i).className = 'fault-row assigned-' + priority;
+  updateTracker();
+  const allDone = assignments.every(a => a !== null);
+  const btn = document.getElementById('reveal-btn');
+  const done = assignments.filter(a => a !== null).length;
+  btn.disabled = !allDone;
+  btn.textContent = allDone
+    ? '👁 Reveal recommended verdict and compare your choices'
+    : '👁 Reveal verdict — assign all faults first (' + done + ' / ' + j.faults.length + ' done)';
+}
+
+function updateTracker() {
+  const j = JOBS[jobIdx];
+  let must = 0, should = 0, could = 0;
+  assignments.forEach((a, i) => {
+    if (a === 'must') must += j.faults[i].cost;
+    else if (a === 'should') should += j.faults[i].cost;
+    else if (a === 'could') could += j.faults[i].cost;
+  });
+  const spending = must + should;
+  const pct = Math.min(110, Math.round(spending / j.budget * 100));
+  const color = spending > j.budget ? 'var(--red)' : pct > 85 ? 'var(--amber)' : 'var(--green)';
+  document.getElementById('bar-fill').style.width = pct + '%';
+  document.getElementById('bar-fill').style.background = color;
+  document.getElementById('tracker-total').innerHTML = '£' + spending + ' <span style="font-size:13px;color:var(--muted);font-weight:400;">/ £' + j.budget + '</span>';
+  document.getElementById('cat-must').textContent = '£' + must;
+  document.getElementById('cat-should').textContent = '£' + should;
+  document.getElementById('cat-could').textContent = '£' + could;
+  const done = assignments.filter(a => a !== null).length;
+  document.getElementById('assign-count').textContent = done + ' / ' + j.faults.length + ' assigned';
+  document.getElementById('tracker-over').style.display = spending > j.budget ? 'block' : 'none';
+}
+
+function revealVerdict() {
+  const j = JOBS[jobIdx];
+  const panel = document.getElementById('verdict-panel');
+  panel.classList.add('open');
+  let matches = 0;
+  const rows = j.faults.map((f, i) => {
+    const mine = assignments[i];
+    const match = mine === f.priority;
+    if (match) matches++;
+    return `<tr>
+      <td>${f.desc}</td>
+      <td style="white-space:nowrap;font-weight:600;color:var(--blue);">£${f.cost}</td>
+      <td>${mine ? '<span class="pri ' + priClass(mine) + '">' + priLabel(mine) + '</span>' : '<span class="not-assigned">—</span>'}</td>
+      <td><span class="pri ${priClass(f.priority)}">${priLabel(f.priority)}</span></td>
+      <td>${match ? '<span class="match">✓ Match</span>' : '<span class="mismatch">✗ Different</span>'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('compare-tbody').innerHTML = rows;
+  document.getElementById('score-display').textContent = matches + ' / ' + j.faults.length;
+  document.getElementById('reveal-btn').style.display = 'none';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function moveJob(d) {
+  jobIdx += d;
+  renderJob();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+renderJob();
+</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnose the Car — MV Level 2</title>
+<style>
+  :root {
+    --dark: #1a1a2e;
+    --darker: #0f0f1a;
+    --card: #16213e;
+    --border: rgba(255,255,255,0.1);
+    --text: #e8e8e8;
+    --muted: #9a9ab0;
+    --accent: #e74c3c;
+    --red: #ef5350;
+    --amber: #ffa726;
+    --green: #4caf50;
+    --blue: #42a5f5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--darker); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--dark);
+    border-bottom: 2px solid var(--accent);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .back-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+  .back-btn:hover { background: var(--card); color: var(--text); }
+  .header-icon { font-size: 24px; flex-shrink: 0; }
+  header h1 { font-size: 17px; font-weight: 600; color: #fff; }
+  header p { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .main { padding: 1.5rem; max-width: 820px; margin: 0 auto; }
+
+  .wb-prompt {
+    background: #2d1a00;
+    border: 1px solid #e67e22;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #f0a040;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1.5;
+  }
+  .wb-icon { font-size: 20px; flex-shrink: 0; }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .nav-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .nav-btn:hover:not(:disabled) { background: #1e2d50; }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .nav-counter { font-size: 14px; color: var(--muted); }
+
+  .main-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-top {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .card-icon {
+    width: 48px; height: 48px;
+    border-radius: 8px;
+    background: #1a2a4a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .card-title { font-size: 17px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .card-sub { font-size: 12px; color: var(--muted); }
+  .diff-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+    margin-left: 8px;
+  }
+  .diff-foundation { background: #1a3a1a; color: #4caf50; }
+  .diff-intermediate { background: #3a2a00; color: #ffa726; }
+  .diff-advanced { background: #3a0f0f; color: #ef5350; }
+
+  .card-body { padding: 1.25rem; }
+
+  .field-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .complaint-box {
+    background: #0e1a2e;
+    border-left: 3px solid var(--blue);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #b8d4f0;
+    font-style: italic;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .reveal-btn {
+    background: #1a2a4a;
+    border: 1px solid var(--blue);
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7ec8f0;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .reveal-btn:hover { background: #1e3560; }
+
+  .reveal-panel { display: none; margin-top: 1.25rem; }
+  .reveal-panel.open { display: block; }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 560px) { .info-grid { grid-template-columns: 1fr; } }
+
+  .info-cell {
+    background: #0e1525;
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .info-cell-label { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .info-cell-val { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  .checks-box {
+    background: #0e1525;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .check-item {
+    display: flex;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-num { color: var(--muted); flex-shrink: 0; min-width: 18px; font-weight: 600; }
+
+  .teacher-note {
+    background: #0d1f0d;
+    border-left: 3px solid var(--green);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #90c890;
+    line-height: 1.6;
+    margin-top: 10px;
+  }
+  .teacher-note strong { color: var(--green); }
+
+  footer { text-align: center; padding: 2rem; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 2rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-btn" href="index.html">← All activities</a>
+  <div class="header-icon">🔧</div>
+  <div>
+    <h1>Diagnose the Car</h1>
+    <p>Read the complaint · Map the fault · Reveal the diagnosis</p>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="wb-prompt">
+    <span class="wb-icon">📋</span>
+    <span>Whiteboard prompt: <strong>System → Component → Checks to carry out → Tools needed → Most likely cause</strong></span>
+  </div>
+
+  <div class="nav-row">
+    <button class="nav-btn" id="diag-prev" onclick="moveScenario(-1)" disabled>← Previous</button>
+    <span class="nav-counter" id="diag-counter">Scenario 1 of 5</span>
+    <button class="nav-btn" id="diag-next" onclick="moveScenario(1)">Next →</button>
+  </div>
+
+  <div id="diag-content"></div>
+
+</div>
+
+<footer>Motor Vehicle Level 2 &nbsp;·&nbsp; East Surrey College &nbsp;·&nbsp; Teacher resource</footer>
+
+<script>
+const SCENARIOS = [
+  {
+    title: "Mrs Jones — the nervous commuter",
+    vehicle: "2018 Ford Fiesta 1.0 EcoBoost",
+    icon: "🚗",
+    difficulty: "Foundation",
+    complaint: "My car pulls to the left when I brake hard, there's a burning smell after a long motorway run, and the brake pedal feels a bit spongy. I've had it 3 years and never touched the brakes.",
+    system: "Braking system",
+    likelyCause: "Seized nearside front brake caliper",
+    checks: [
+      "Visual inspection of all four calipers for seizure or uneven pad wear",
+      "Check brake fluid level and colour in reservoir",
+      "Press and release pedal — check for sponginess (air in lines)",
+      "Spin each wheel by hand — check for binding",
+      "Check brake pad thickness all round"
+    ],
+    tools: "Axle stands, torque wrench, brake caliper wind-back tool, brake fluid tester, micrometer (disc thickness)",
+    teacherNote: "Ask: why does a seized caliper cause a pull? Which side is it likely on? What does a spongy pedal tell us about the hydraulics? The burning smell — link to friction heat from constant pad contact."
+  },
+  {
+    title: "Dave — the track day enthusiast",
+    vehicle: "2005 Honda Civic Type R EP3",
+    icon: "🏎️",
+    difficulty: "Intermediate",
+    complaint: "After my last track day the car is vibrating through the steering wheel at 60–70mph, there's a loud clunking from the front-left when going over bumps, and the tyre is wearing on the inside edge only.",
+    system: "Suspension & Steering",
+    likelyCause: "Worn front nearside lower arm bush / ball joint — likely bent or worn track rod end contributing to inside edge wear",
+    checks: [
+      "Inspect lower arm bushes for cracking or collapse",
+      "Check ball joint for play (lever bar test)",
+      "Inspect track rod ends for play",
+      "Check wheel bearing for rough rotation or play",
+      "Four-wheel alignment check — measure camber and toe",
+      "Inspect tyre condition on all four corners"
+    ],
+    tools: "Axle stands, pry bar, dial gauge (bearing play), 4-wheel laser alignment rig",
+    teacherNote: "Classic track day damage. Ask: what causes inside edge tyre wear specifically? (negative camber / toe-out). Why does the bump cause a clunk rather than just vibration? Link suspension geometry to real handling outcomes."
+  },
+  {
+    title: "Karen — the school run mum",
+    vehicle: "2015 Vauxhall Zafira 1.4T",
+    icon: "🚙",
+    difficulty: "Intermediate",
+    complaint: "The engine warning light came on this morning, there's a rough idle when I stop at traffic lights, sometimes it nearly stalls, and I've noticed I'm filling up much more often than usual.",
+    system: "Engine management / Fuelling",
+    likelyCause: "Faulty MAF sensor or vacuum leak causing incorrect fuelling — possible misfire on one cylinder",
+    checks: [
+      "Connect OBD-II diagnostic scanner — read and record all fault codes",
+      "Check for vacuum leaks on inlet manifold and hoses (smoke test or visual)",
+      "Inspect MAF sensor — check for contamination",
+      "Check spark plugs for condition and colour",
+      "Inspect injectors (listen with stethoscope)",
+      "Check fuel pressure"
+    ],
+    tools: "OBD-II scanner, smoke machine, multimeter, spark plug socket, mechanic's stethoscope",
+    teacherNote: "Always read codes first before touching anything. Ask: why does a vacuum leak cause rough idle? What does a black sooty plug vs white plug tell you? Link the fuel consumption increase to rich running."
+  },
+  {
+    title: "Barry — the retired lorry driver",
+    vehicle: "2010 Land Rover Discovery 4 3.0 TDV6",
+    icon: "🚐",
+    difficulty: "Advanced",
+    complaint: "There's white smoke from the exhaust on startup that clears after a few minutes, the coolant level keeps dropping, and I've noticed the oil looks a bit milky on the dipstick.",
+    system: "Engine — coolant & lubrication",
+    likelyCause: "Head gasket failure — coolant ingress into combustion chamber and oil passages",
+    checks: [
+      "Check coolant reservoir for oil contamination",
+      "Check engine oil for white emulsion (milky appearance)",
+      "Combustion gas test on coolant reservoir (CO2 test)",
+      "Compression test on all cylinders — compare readings",
+      "Cylinder leak-down test to identify which cylinder",
+      "Check for sweet smell from exhaust"
+    ],
+    tools: "Combustion gas test kit, compression tester, leak-down tester, borescope (optional)",
+    teacherNote: "Ask: why does mixing of oil and coolant become catastrophic if left? Why does white smoke appear on startup only? (coolant burning off). What does a compression test tell you that an OBD scanner can't?"
+  },
+  {
+    title: "Jordan — the new driver",
+    vehicle: "2012 Toyota Yaris 1.33 VVT-i",
+    icon: "🔑",
+    difficulty: "Foundation",
+    complaint: "My car absolutely stinks of petrol, especially when I first start it. The engine also takes longer to start than it used to, and sometimes it runs rough for the first minute.",
+    system: "Fuel system",
+    likelyCause: "Leaking injector O-ring or faulty fuel pressure regulator causing fuel to dribble into the inlet overnight",
+    checks: [
+      "Visual inspection under bonnet for fuel smell source — check injector rail and lines",
+      "Check fuel pressure regulator for diaphragm failure",
+      "Inspect injector O-rings for cracking or fuel wetness",
+      "Cold start crank time test",
+      "Check for fuel in inlet manifold (remove air filter, inspect)"
+    ],
+    tools: "Fuel pressure gauge, UV leak detection kit, inspection mirror and torch",
+    teacherNote: "Petrol smell is always serious — fire risk. Ask: why does it only smell on startup? (fuel pools overnight). Link to COSHH — working with fuel requires specific PPE and ventilation. What safety steps before opening any fuel system?"
+  }
+];
+
+let diagIdx = 0;
+
+function diffClass(d) {
+  if (d === 'Foundation') return 'diff-foundation';
+  if (d === 'Intermediate') return 'diff-intermediate';
+  return 'diff-advanced';
+}
+
+function renderScenario() {
+  const s = SCENARIOS[diagIdx];
+  document.getElementById('diag-counter').textContent = 'Scenario ' + (diagIdx + 1) + ' of ' + SCENARIOS.length;
+  document.getElementById('diag-prev').disabled = diagIdx === 0;
+  document.getElementById('diag-next').disabled = diagIdx === SCENARIOS.length - 1;
+
+  document.getElementById('diag-content').innerHTML = `
+    <div class="main-card">
+      <div class="card-top">
+        <div class="card-icon">${s.icon}</div>
+        <div>
+          <div class="card-title">${s.title} <span class="diff-badge ${diffClass(s.difficulty)}">${s.difficulty}</span></div>
+          <div class="card-sub">${s.vehicle}</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-label">Customer complaint</div>
+        <div class="complaint-box">"${s.complaint}"</div>
+        <button class="reveal-btn" id="reveal-btn" onclick="toggleReveal()">👁 Show diagnosis</button>
+        <div class="reveal-panel" id="reveal-panel">
+          <div class="info-grid">
+            <div class="info-cell">
+              <div class="info-cell-label">Suspect system</div>
+              <div class="info-cell-val">${s.system}</div>
+            </div>
+            <div class="info-cell">
+              <div class="info-cell-label">Most likely cause</div>
+              <div class="info-cell-val">${s.likelyCause}</div>
+            </div>
+          </div>
+          <div class="checks-box">
+            <div class="info-cell-label" style="margin-bottom:10px;">Checks to carry out</div>
+            ${s.checks.map((c, i) => `<div class="check-item"><span class="check-num">${i + 1}.</span><span>${c}</span></div>`).join('')}
+          </div>
+          <div class="info-cell">
+            <div class="info-cell-label">Tools &amp; equipment</div>
+            <div class="info-cell-val">${s.tools}</div>
+          </div>
+          <div class="teacher-note"><strong>Teacher note:</strong> ${s.teacherNote}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleReveal() {
+  const panel = document.getElementById('reveal-panel');
+  const btn = document.getElementById('reveal-btn');
+  const open = panel.classList.toggle('open');
+  btn.textContent = open ? '🙈 Hide diagnosis' : '👁 Show diagnosis';
+}
+
+function moveScenario(d) {
+  diagIdx += d;
+  renderScenario();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+renderScenario();
+</script>
+</body>
+</html>

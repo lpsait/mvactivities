@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MV Level 2 — Classroom Activities</title>
+<style>
+  :root {
+    --dark: #1a1a2e;
+    --darker: #0f0f1a;
+    --card: #16213e;
+    --border: rgba(255,255,255,0.12);
+    --text: #e8e8e8;
+    --muted: #9a9ab0;
+    --accent: #e74c3c;
+    --green: #4caf50;
+    --blue: #42a5f5;
+    --amber: #ffa726;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--darker);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--dark);
+    border-bottom: 2px solid var(--accent);
+    padding: 1.5rem 2rem;
+    text-align: center;
+  }
+  .header-flag {
+    width: 52px; height: 52px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 1rem;
+  }
+  header h1 { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  header p { font-size: 14px; color: var(--muted); }
+
+  .main {
+    flex: 1;
+    padding: 2.5rem 1.5rem;
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+
+  .activity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  @media (max-width: 560px) { .activity-grid { grid-template-columns: 1fr; } }
+
+  .activity-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem 1.5rem;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: border-color 0.2s, transform 0.15s, background 0.2s;
+    cursor: pointer;
+  }
+  .activity-card:hover {
+    border-color: rgba(255,255,255,0.3);
+    background: #1e2d50;
+    transform: translateY(-2px);
+  }
+  .activity-card:active { transform: translateY(0); }
+
+  .card-emoji { font-size: 36px; }
+  .card-title { font-size: 18px; font-weight: 700; color: #fff; }
+  .card-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .tag-red { background: #3a0f0f; color: #ef5350; }
+  .tag-blue { background: #0d1f3a; color: var(--blue); }
+  .tag-green { background: #0d2a1a; color: var(--green); }
+  .tag-amber { background: #3a2a00; color: var(--amber); }
+
+  .card-arrow {
+    margin-top: auto;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .how-it-works {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .how-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 1rem; }
+  .how-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .how-row:last-child { margin-bottom: 0; }
+  .how-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-flag">🏁</div>
+  <h1>MV Level 2 — Classroom Activities</h1>
+  <p>Motor Vehicle Engineering &nbsp;·&nbsp; End of course activities</p>
+</header>
+
+<div class="main">
+
+  <div class="section-label">Choose an activity</div>
+
+  <div class="activity-grid">
+
+    <a class="activity-card" href="diagnose.html">
+      <div class="card-emoji">🔧</div>
+      <div class="card-title">Diagnose the Car</div>
+      <div class="card-desc">Read a customer complaint, work out the fault, identify the system, checks and tools needed — then reveal the diagnosis.</div>
+      <div class="card-tags">
+        <span class="tag tag-blue">5 scenarios</span>
+        <span class="tag tag-amber">Whiteboard</span>
+        <span class="tag tag-green">Team activity</span>
+      </div>
+      <div class="card-arrow">Open activity →</div>
+    </a>
+
+    <a class="activity-card" href="500fix.html">
+      <div class="card-emoji">💸</div>
+      <div class="card-title">The £500 Fix</div>
+      <div class="card-desc">A customer brings in a car with a list of faults and a £500 budget. Decide what to fix, what to defer, and justify every choice.</div>
+      <div class="card-tags">
+        <span class="tag tag-blue">4 jobs</span>
+        <span class="tag tag-red">Budget tracker</span>
+        <span class="tag tag-green">Team activity</span>
+      </div>
+      <div class="card-arrow">Open activity →</div>
+    </a>
+
+  </div>
+
+  <div class="how-it-works">
+    <div class="how-title">How to run these activities</div>
+    <div class="how-row"><div class="how-icon">👥</div><div>Split the class into teams of 3–4. Display this page on the projector and let a student click through.</div></div>
+    <div class="how-row"><div class="how-icon">📋</div><div>Each activity starts with a whiteboard prompt — write it up before you begin so teams know what to map out.</div></div>
+    <div class="how-row"><div class="how-icon">💬</div><div>Give teams 5 minutes to discuss and write their answers on the whiteboard before revealing the answer.</div></div>
+    <div class="how-row"><div class="how-icon">🏆</div><div>Award a point to the team with the best reasoning — not just the right answer, but the best justification.</div></div>
+  </div>
+
+</div>
+
+<footer>Motor Vehicle Level 2 &nbsp;·&nbsp; East Surrey College &nbsp;·&nbsp; Teacher resource</footer>
+
+</body>
+</html>
